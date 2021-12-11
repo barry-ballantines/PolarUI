@@ -4,6 +4,14 @@ export class CoordinateConverter {
     this._parent = parent;
   }
 
+  cartesianToPolar(cartesian) {
+    return this.centricToPolar(this.cartesianToCentric(cartesian));
+  }
+
+  polarToCartesian(polar) {
+    return this.centricToCartesian(this.polarToCentric(polar));
+  }
+
   cartesianToCentric(cartesian) {
     return {
         x: cartesian.x - this._parent._centerX,
@@ -46,4 +54,5 @@ export class CoordinateConverter {
         y: r_norm * Math.cos(angle_rad) * multiplier_y
     };
   }
+
 }

@@ -1,6 +1,7 @@
 import { CanvasUI } from "./CanvasUI.js";
 import { Settings } from "./Settings.js";
 import { CoordinateConverter } from "./CoordinateConverter.js";
+import { PolarLine } from "./PolarLine.js";
 
 class PolarCanvas {
 
@@ -8,6 +9,8 @@ class PolarCanvas {
         this._canvas = document.querySelector("#canvas");
 
         this._debug = document.querySelector("#debug");
+
+        this._polarOutputEL = document.querySelector("#polarText");
 
         this._image = undefined;
 
@@ -18,6 +21,8 @@ class PolarCanvas {
         this._calibrationValue = 20.0;
 
         this._coords = new CoordinateConverter(this);
+
+        this._polarLine = new PolarLine();
 
         document.querySelector("#fileUpload").addEventListener("change", (evt) => {
             let target = evt.currentTarget;
@@ -50,10 +55,30 @@ class PolarCanvas {
             this._canvas.title = "BS: " + this.round(pos.radius, 1) + ", TWA: " + this.round(pos.angle, 0) + "° "
         });
 
+        this._canvas.addEventListener("mousedown", evt => {
+            let pol = this.getCalibratedPolarMousePosition(evt);
+            this._polarLine.addPolar(pol);
+            this.redraw();
+            this.refreshPolarOutput();
+        });
+
         this.registerCalibrationButtons("#centerX", increment => { this._centerX += increment; });
         this.registerCalibrationButtons("#centerY", increment => { this._centerY += increment; });
         this.registerCalibrationButtons("#calibrateR", increment => { this._calibrationR += increment; });
         this.registerCalibrationButtons("#calibrateE", increment => { this._calibrationE += increment; });
+
+        document.querySelector("#clearPolar").addEventListener("click", evt => {
+            this._polarLine.clear();
+            this.redraw();
+            this.refreshPolarOutput();
+        });
+
+        document.querySelector("#reloadPolar").addEventListener("click", evt => {
+            let text = this._polarOutputEL.value;
+            this._polarLine.fromText(text);
+            this.redraw();
+            this.refreshPolarOutput();
+        });
     }
 
     registerCalibrationButtons(label, callback) {
@@ -82,6 +107,11 @@ class PolarCanvas {
         this.clearCanvas();
         this.drawImage();
         this.drawCalibrationLines();
+        this.drawPolarLine();
+    }
+
+    refreshPolarOutput() {
+        this._polarOutputEL.value = this._polarLine.toText();
     }
 
     clearCanvas() {
@@ -118,6 +148,27 @@ class PolarCanvas {
             Settings.calibration_circle_color);
 
         this._ui._ctx.setLineDash([]);
+    }
+
+    drawPolarLine() {
+        if (this._polarLine.length()<2) return;
+
+        let ctx = this._ui._ctx;
+        ctx.beginPath();
+        ctx.strokeStyle = Settings.polarline_color;
+        ctx.lineWidth = 1;
+
+        let pos = this._coords.polarToCartesian(this._polarLine.get(0));
+        ctx.moveTo(pos.x, pos.y);
+        for (let i=1; i<this._polarLine.length(); i++) {
+            let previousPos = pos;
+            pos = this._coords.polarToCartesian(this._polarLine.get(i));
+            ctx.lineTo(pos.x, pos.y);
+            ctx.arc(pos.x, pos.y, 2, 0, 2*Math.PI);
+            ctx.moveTo(pos.x, pos.y);
+        }
+        ctx.stroke();
+
     }
 
     getCentricMousePosition(evt) {

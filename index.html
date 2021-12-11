@@ -17,7 +17,7 @@
           padding: 10px;
         }
 
-        #controls {
+        .controls {
           display: block;
           float: left;
           border: 1px gray solid;
@@ -37,7 +37,7 @@
   <div id="canvasArea">
     <canvas id="canvas" width="800" height="800" title=""></canvas>
   </div>
-  <div id="controls">
+  <div class="controls">
     <h3>Polar Diagram</h3>
     <input type='file' id="fileUpload" />
     <h3>Calibration</h3>
@@ -77,6 +77,13 @@
     <p id="debug">No Data</p>
   </div>
   
+  <div class="controls">
+    <h3>Output</h3>
+    <textarea id="polarText"></textarea>
+    <br />
+    <button id="clearPolar">Clear</button>
+    <button id="reloadPolar">Reload</button>
+  </div>
 
   <!-- SCRIPTS -->
   <script type="module" src="js/PolarCanvas.js"></script>
