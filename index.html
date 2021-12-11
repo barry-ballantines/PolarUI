@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        #canvas {
+          cursor: crosshair;
+          border:0px;
+          padding:0px;
+        }
+
+        #canvasArea {
+          display: block;
+          float: left;
+          border: 1px gray solid;
+          margin: 10px;
+          padding: 10px;
+        }
+
+        #controls {
+          display: block;
+          float: left;
+          border: 1px gray solid;
+          margin: 10px;
+          padding: 10px;
+        }
+
+        .label {
+          display: inline-block;
+          width: 90px;
+        }
+        
+    </style>
+</head>
+<body>
+  <h1>POLAR Diagram Parser</h1>
+  <div id="canvasArea">
+    <canvas id="canvas" width="800" height="800" title=""></canvas>
+  </div>
+  <div id="controls">
+    <h3>Polar Diagram</h3>
+    <input type='file' id="fileUpload" />
+    <h3>Calibration</h3>
+    <p>
+      <span class="label">Center X:</span>
+      <button id="centerXDecr10">-10</button>
+      <button id="centerXDecr1">-1</button>
+      <button id="centerXIncr1">+1</button>
+      <button id="centerXIncr10">+10</button>
+    </p>
+    <p>
+      <span class="label">Center Y:</span>
+      <button id="centerYDecr10">-10</button>
+      <button id="centerYDecr1">-1</button>
+      <button id="centerYIncr1">+1</button>
+      <button id="centerYIncr10">+10</button>
+    </p>
+    <p>
+      <span class="label">Calibration:</span>
+      <input id="calibrationValue" type="text" value="20" size="4"/> kts
+    </p>
+    <p>
+      <span class="label">Radius:</span>
+      <button id="calibrateRDecr10">-10</button>
+      <button id="calibrateRDecr1">-1</button>
+      <button id="calibrateRIncr1">+1</button>
+      <button id="calibrateRIncr10">+10</button>
+    </p>
+    <p>
+      <span class="label">Excentricity:</span>
+      <button id="calibrateEDecr10">-10</button>
+      <button id="calibrateEDecr1">-1</button>
+      <button id="calibrateEIncr1">+1</button>
+      <button id="calibrateEIncr10">+10</button>
+    </p>
+    <h3>Debug</h3>
+    <p id="debug">No Data</p>
+  </div>
+  
+
+  <!-- SCRIPTS -->
+  <script type="module" src="js/PolarCanvas.js"></script>
+
+</body>
+</html>
