@@ -1,5 +1,6 @@
 import { CanvasUI } from "./CanvasUI.js";
 import { Settings } from "./Settings.js";
+import { CoordinateConverter } from "./CoordinateConverter.js";
 
 class PolarCanvas {
 
@@ -15,6 +16,8 @@ class PolarCanvas {
         this.resetCalibration();
 
         this._calibrationValue = 20.0;
+
+        this._coords = new CoordinateConverter(this);
 
         document.querySelector("#fileUpload").addEventListener("change", (evt) => {
             let target = evt.currentTarget;
@@ -117,58 +120,15 @@ class PolarCanvas {
         this._ui._ctx.setLineDash([]);
     }
 
-    cartesianToCentric(cartesian) {
-        return {
-            x: cartesian.x - this._centerX,
-            y: this._centerY - cartesian.y
-        };
-    }
-
-    centricToCartesian(centric) {
-        return {
-            x: centric.x + this._centerX,
-            y: this._centerY - centric.y
-        };
-    }
-
     getCentricMousePosition(evt) {
         let pos = this._ui.getMousePosition(evt);
-        return this.cartesianToCentric(pos);
-    }
-
-    centricToPolar(centric) {
-        let ry = this._calibrationR;
-        let rx = this._calibrationR + this._calibrationE;
-
-        let cx = this._calibrationValue * centric.x / rx;
-        let cy = this._calibrationValue * centric.y / ry;
-
-        let radius = Math.sqrt(cx * cx + cy * cy);
-        let angle = Math.atan2(cx, cy);
-
-        return {
-            radius: radius,
-            angle: 180 * angle / Math.PI
-        };
-    }
-
-    polarToCentric(polar) {    
-        let multiplier_y = this._calibrationR;
-        let multiplier_x = this._calibrationR + this._calibrationE;
-
-        let r_norm = polar.radius / this._calibrationValue;
-        let angle_rad = polar.angle / 180 * Math.PI;
-
-        return {
-            x: r_norm * Math.sin(angle_rad) * multiplier_x,
-            y: r_norm * Math.cos(angle_rad) * multiplier_y
-        };
+        return this._coords.cartesianToCentric(pos);
     }
 
     getCalibratedPolarMousePosition(evt) {
         let pos = this.getCentricMousePosition(evt);
         
-        return this.centricToPolar(pos);
+        return this._coords.centricToPolar(pos);
     }
 
     round(value, decimalPoints = 0) {
