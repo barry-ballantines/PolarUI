@@ -158,11 +158,29 @@ class PolarCanvas {
         ctx.strokeStyle = Settings.polarline_color;
         ctx.lineWidth = 1;
 
-        let pos = this._coords.polarToCartesian(this._polarLine.get(0));
+        let pol = this._polarLine.get(0);
+        let pos = this._coords.polarToCartesian(pol);
+
         ctx.moveTo(pos.x, pos.y);
         for (let i=1; i<this._polarLine.length(); i++) {
-            let previousPos = pos;
-            pos = this._coords.polarToCartesian(this._polarLine.get(i));
+            let previousPol = pol;
+            pol = this._polarLine.get(i);
+            pos = this._coords.polarToCartesian(pol);
+            
+            let dAngle = pol.angle - previousPol.angle;
+            let dRadius = pol.radius - previousPol.radius;
+            let m = dRadius/dAngle;
+
+            for (let a=previousPol.angle + 1; a<=pol.angle; a++) {
+                let npol = {
+                    angle: a,
+                    radius: previousPol.radius + m * (a - previousPol.angle)
+                }
+                let npos = this._coords.polarToCartesian(npol);
+                ctx.lineTo(npos.x, npos.y);
+            }
+
+
             ctx.lineTo(pos.x, pos.y);
             ctx.arc(pos.x, pos.y, 2, 0, 2*Math.PI);
             ctx.moveTo(pos.x, pos.y);
