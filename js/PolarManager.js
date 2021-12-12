@@ -1,3 +1,4 @@
+import { MultiPolarsFormat } from "./MultiPolarsFormat.js";
 import { PolarLine } from "./PolarLine.js";
 import { SinglePolarFormat } from "./SinglePolarFormat.js";
 
@@ -35,7 +36,7 @@ export class PolarManager {
       this._polarLines.push( this._current.clone());
       this.sortPolarLines();
     }
-    this.uiRrefreshPolarLines();
+    this.uiRefreshStoredPolarsOutput();
   }
 
   sortPolarLines() {
@@ -45,19 +46,41 @@ export class PolarManager {
   uiRegisterComponents() {
 
     this._uiCurrentPolarEditor = document.querySelector("#currentPolar_editor");
+    this._uiCurrentPolarWindspeedTF = document.querySelector("#currentPolar_windspeed");
+    this._uiCurrentPolarStoreBtn = document.querySelector("#currentPolar_store");
+    this._uiCurrentPolarClearBtn = document.querySelector("#currentPolar_clear");
+    this._uiCurrentPolarRefreshBtn = document.querySelector("#currentPolar_refresh");
+    this._uiStoredPolarsOutput = document.querySelector("#storedPolars_output");
 
-    document.querySelector("#currentPolar_clear").addEventListener("click", evt => {
+    this._uiCurrentPolarWindspeedTF.addEventListener("change", evt => {
+      let ws = parseInt(this._uiCurrentPolarWindspeedTF.value.trim());
+      if (isNaN(ws)) {
+        this._uiCurrentPolarStoreBtn.disabled=true;
+        this._current.setWindspeed(null);
+      } 
+      else {
+        this._uiCurrentPolarStoreBtn.disabled=false;
+        this._current.setWindspeed(ws);
+      }
+    });
+
+    this._uiCurrentPolarClearBtn.addEventListener("click", evt => {
       this._current.clear();
+      this._uiCurrentPolarWindspeedTF.value = "";
       this.uiRefreshCurrentPolarEditor()
       window.polarCanvas.redraw();
     });
 
-    document.querySelector("#currentPolar_refresh").addEventListener("click", evt => {
+    this._uiCurrentPolarRefreshBtn.addEventListener("click", evt => {
       let text = this._uiCurrentPolarEditor.value;
       let format = new SinglePolarFormat(this._current);
       format.fromString(text);
       this.uiRefreshCurrentPolarEditor();
       window.polarCanvas.redraw();
+    });
+
+    this._uiCurrentPolarStoreBtn.addEventListener("click", evt => {
+      this.storeCurrent();
     });
 
     this.uiRefreshCurrentPolarEditor();
@@ -69,8 +92,8 @@ export class PolarManager {
     this._uiCurrentPolarEditor.value = "TWA\tBS\r" + (new SinglePolarFormat(this._current)).toString();
   }
 
-  uiRrefreshPolarLines() {
-    // TODO...
+  uiRefreshStoredPolarsOutput() {
+    this._uiStoredPolarsOutput.value = (new MultiPolarsFormat(this._polarLines)).toString();
   }
 }
 
