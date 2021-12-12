@@ -20,6 +20,7 @@
         .controls {
           display: block;
           float: left;
+          width: 260px;
           border: 1px gray solid;
           margin: 10px;
           padding: 10px;
@@ -56,7 +57,7 @@
       <button id="centerYIncr10">+10</button>
     </p>
     <p>
-      <span class="label">Calibration:</span>
+      <span class="label">Windspeed:</span>
       <input id="calibrationValue" type="text" value="20" size="4"/> kts
     </p>
     <p>
@@ -73,20 +74,25 @@
       <button id="calibrateEIncr1">+1</button>
       <button id="calibrateEIncr10">+10</button>
     </p>
-    <h3>Debug</h3>
-    <p id="debug">No Data</p>
   </div>
   
   <div class="controls">
-    <h3>Output</h3>
-    <textarea id="polarText"></textarea>
+    <h3>Current Polar Editor</h3>
+    <textarea id="currentPolar_editor" rows="10"></textarea>
     <br />
-    <button id="clearPolar">Clear</button>
-    <button id="reloadPolar">Reload</button>
+    <button id="currentPolar_clear">Clear</button>
+    <button id="currentPolar_refresh">Refresh UI</button>
+    <p>Add data points by clicking on the polar diagram.
+       If you edit your data points in the text area above,
+       pressing [Refresh] will update the polar diagram.
+       Use [Clear] to delete all data points.
+    </p>
+    <br />
   </div>
 
   <!-- SCRIPTS -->
   <script type="module" src="js/PolarCanvas.js"></script>
+  <script type="module" src="js/PolarManager.js"></script>
 
 </body>
 </html>

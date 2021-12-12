@@ -3,7 +3,24 @@ import { round } from "./Utils.js";
 export class PolarLine {
 
   constructor() {
+    this._windspeed = undefined;
+
     this.clear();
+  }
+
+  clone() {
+    let that = new PolarLine();
+    that._windspeed = this._windspeed;
+    that._polars = [ ... this._polars ];
+    return that;
+  }
+
+  windspeed() {
+    return this._windspeed;
+  }
+
+  setWindspeed(windspeed) {
+    this._windspeed = windspeed;
   }
 
   length() {
@@ -27,32 +44,5 @@ export class PolarLine {
   sort() {
     this._polars.sort( (a, b) => { return a.angle - b.angle })
   }
-
-  toText() {
-    let text="";
-    for (let i=0; i<this._polars.length; i++) {
-      let pol = this._polars[i];
-      text += round(pol.angle, 0);
-      text += "\t";
-      text += round(pol.radius, 1);
-      text += "\n";
-    }
-    return text;
-  }
-
-  fromText(text) {
-    this._polars = []
-    let pairs = text.split(/\n/);
-    pairs.forEach(value => {
-      let angleRadius = value.split(/\t/);
-      if (angleRadius.length==2) {
-        let pol = {
-          angle: parseInt(angleRadius[0].trim()),
-          radius: parseFloat(angleRadius[1].trim())
-        };
-        this._polars.push(pol);
-      }    
-    });
-    this.sort();
-  }
+  
 }

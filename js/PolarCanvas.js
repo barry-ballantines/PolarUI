@@ -1,28 +1,25 @@
 import { CanvasUI } from "./CanvasUI.js";
 import { Settings } from "./Settings.js";
 import { CoordinateConverter } from "./CoordinateConverter.js";
-import { PolarLine } from "./PolarLine.js";
 
 class PolarCanvas {
 
     constructor() {
-        this._canvas = document.querySelector("#canvas");
-
-        this._debug = document.querySelector("#debug");
-
-        this._polarOutputEL = document.querySelector("#polarText");
-
-        this._image = undefined;
-
-        this._ui = new CanvasUI(this._canvas);
+        this._calibrationValue = 20.0;
+        this._coords = new CoordinateConverter(this);
+        
+        this.uiRegisterComponents();
 
         this.resetCalibration();
+    }
 
-        this._calibrationValue = 20.0;
-
-        this._coords = new CoordinateConverter(this);
-
-        this._polarLine = new PolarLine();
+    uiRegisterComponents() {
+        
+        this._image = undefined;
+        this._canvas = document.querySelector("#canvas");
+        this._debug = document.querySelector("#debug");
+        
+        this._ui = new CanvasUI(this._canvas);
 
         document.querySelector("#fileUpload").addEventListener("change", (evt) => {
             let target = evt.currentTarget;
@@ -49,46 +46,30 @@ class PolarCanvas {
 
         this._canvas.addEventListener("mousemove", evt => {
             let pos = this.getCalibratedPolarMousePosition(evt);
-            let coords = this.getCentricMousePosition(evt);
-            this._debug.innerHTML = "Pos: (BS: " + this.round(pos.radius, 1) + ", TWA: " + this.round(pos.angle, 0) + "°) <br />"
-                + "Coords: (" + coords.x + ", " + coords.y + ")";
             this._canvas.title = "BS: " + this.round(pos.radius, 1) + ", TWA: " + this.round(pos.angle, 0) + "° "
         });
 
         this._canvas.addEventListener("mousedown", evt => {
             let pol = this.getCalibratedPolarMousePosition(evt);
-            this._polarLine.addPolar(pol);
+            window.polarManager.current().addPolar(pol);
+            window.polarManager.uiRefreshCurrentPolarEditor();
             this.redraw();
-            this.refreshPolarOutput();
         });
 
-        this.registerCalibrationButtons("#centerX", increment => { this._centerX += increment; });
-        this.registerCalibrationButtons("#centerY", increment => { this._centerY += increment; });
-        this.registerCalibrationButtons("#calibrateR", increment => { this._calibrationR += increment; });
-        this.registerCalibrationButtons("#calibrateE", increment => { this._calibrationE += increment; });
-
-        document.querySelector("#clearPolar").addEventListener("click", evt => {
-            this._polarLine.clear();
-            this.redraw();
-            this.refreshPolarOutput();
-        });
-
-        document.querySelector("#reloadPolar").addEventListener("click", evt => {
-            let text = this._polarOutputEL.value;
-            this._polarLine.fromText(text);
-            this.redraw();
-            this.refreshPolarOutput();
-        });
+        this.uiRegisterCalibrationButtons("#centerX", increment => { this._centerX += increment; });
+        this.uiRegisterCalibrationButtons("#centerY", increment => { this._centerY += increment; });
+        this.uiRegisterCalibrationButtons("#calibrateR", increment => { this._calibrationR += increment; });
+        this.uiRegisterCalibrationButtons("#calibrateE", increment => { this._calibrationE += increment; });
     }
 
-    registerCalibrationButtons(label, callback) {
-        this.registerCalibrationButton(label + "Decr10", -10, callback);
-        this.registerCalibrationButton(label + "Decr1", -1, callback);
-        this.registerCalibrationButton(label + "Incr1", +1, callback);
-        this.registerCalibrationButton(label + "Incr10", +10, callback);
+    uiRegisterCalibrationButtons(label, callback) {
+        this.uiRegisterCalibrationButton(label + "Decr10", -10, callback);
+        this.uiRegisterCalibrationButton(label + "Decr1", -1, callback);
+        this.uiRegisterCalibrationButton(label + "Incr1", +1, callback);
+        this.uiRegisterCalibrationButton(label + "Incr10", +10, callback);
     }
 
-    registerCalibrationButton(label, increment, callback) {
+    uiRegisterCalibrationButton(label, increment, callback) {
         let button = document.querySelector(label);
         button.addEventListener("click", evt => {
             callback(increment);
@@ -104,21 +85,17 @@ class PolarCanvas {
     }
 
     redraw() {
-        this.clearCanvas();
-        this.drawImage();
-        this.drawCalibrationLines();
-        this.drawPolarLine();
+        this.uiClearCanvas();
+        this.uiDrawImage();
+        this.uiDrawCalibrationLines();
+        this.uiDrawPolarLine();
     }
 
-    refreshPolarOutput() {
-        this._polarOutputEL.value = this._polarLine.toText();
-    }
-
-    clearCanvas() {
+    uiClearCanvas() {
         this._ui.clear();
     }
 
-    drawImage() {
+    uiDrawImage() {
         if (this._image) {
             this._ui.drawImage(this._image);
         } else {
@@ -126,7 +103,7 @@ class PolarCanvas {
         }
     }
 
-    drawCalibrationLines() {
+    uiDrawCalibrationLines() {
 
         this._ui._ctx.setLineDash([8, 4]);
         // draw center
@@ -150,21 +127,24 @@ class PolarCanvas {
         this._ui._ctx.setLineDash([]);
     }
 
-    drawPolarLine() {
-        if (this._polarLine.length()<2) return;
+    uiDrawPolarLine() {
+        if (!window.polarManager) return;
+
+        let polarLine = window.polarManager.current();
+        if (polarLine.length()<2) return;
 
         let ctx = this._ui._ctx;
         ctx.beginPath();
         ctx.strokeStyle = Settings.polarline_color;
         ctx.lineWidth = 1;
 
-        let pol = this._polarLine.get(0);
+        let pol = polarLine.get(0);
         let pos = this._coords.polarToCartesian(pol);
 
         ctx.moveTo(pos.x, pos.y);
-        for (let i=1; i<this._polarLine.length(); i++) {
+        for (let i=1; i<polarLine.length(); i++) {
             let previousPol = pol;
-            pol = this._polarLine.get(i);
+            pol = polarLine.get(i);
             pos = this._coords.polarToCartesian(pol);
             
             let dAngle = pol.angle - previousPol.angle;
