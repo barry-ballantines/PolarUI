@@ -22,7 +22,7 @@ export class SinglePolarFormat {
     let polars = [];
     let pairs = text.split(/\n/);
     pairs.forEach(value => {
-      let angleRadius = value.split(/\t/);
+      let angleRadius = value.split(/\s+/);
       if (angleRadius.length==2) {
         let pol = {
           angle: parseInt(angleRadius[0].trim()),
