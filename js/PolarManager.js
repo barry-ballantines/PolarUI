@@ -37,10 +37,16 @@ export class PolarManager {
       this.sortPolarLines();
     }
     this.uiRefreshStoredPolarsOutput();
+    this.uiRefreshCurrentPolarLoadStoreBtns();
   }
 
   sortPolarLines() {
     this._polarLines.sort( (a, b) => a.windspeed() - b.windspeed() );
+  }
+
+  currentWindspeed() {
+    let ws = parseInt(this._uiCurrentPolarWindspeedTF.value.trim());
+    return (isNaN(ws)) ? undefined : ws;
   }
 
   uiRegisterComponents() {
@@ -48,18 +54,18 @@ export class PolarManager {
     this._uiCurrentPolarEditor = document.querySelector("#currentPolar_editor");
     this._uiCurrentPolarWindspeedTF = document.querySelector("#currentPolar_windspeed");
     this._uiCurrentPolarStoreBtn = document.querySelector("#currentPolar_store");
+    this._uiCurrentPolarLoadBtn = document.querySelector("#currentPolar_load");
     this._uiCurrentPolarClearBtn = document.querySelector("#currentPolar_clear");
     this._uiCurrentPolarRefreshBtn = document.querySelector("#currentPolar_refresh");
     this._uiStoredPolarsOutput = document.querySelector("#storedPolars_output");
 
     this._uiCurrentPolarWindspeedTF.addEventListener("change", evt => {
-      let ws = parseInt(this._uiCurrentPolarWindspeedTF.value.trim());
-      if (isNaN(ws)) {
-        this._uiCurrentPolarStoreBtn.disabled=true;
+      this.uiRefreshCurrentPolarLoadStoreBtns();
+      let ws = this.currentWindspeed();
+      if (!ws) {
         this._current.setWindspeed(null);
       } 
       else {
-        this._uiCurrentPolarStoreBtn.disabled=false;
         this._current.setWindspeed(ws);
       }
     });
@@ -67,7 +73,7 @@ export class PolarManager {
     this._uiCurrentPolarClearBtn.addEventListener("click", evt => {
       this._current.clear();
       this._uiCurrentPolarWindspeedTF.value = "";
-      this._uiCurrentPolarStoreBtn.disabled = true;
+      this.uiRefreshCurrentPolarLoadStoreBtns();
       this.uiRefreshCurrentPolarEditor()
       window.polarCanvas.redraw();
     });
@@ -84,12 +90,41 @@ export class PolarManager {
       this.storeCurrent();
     });
 
+    this._uiCurrentPolarLoadBtn.addEventListener("click", evt => {
+      let ws = this.currentWindspeed();
+      if (!ws) {
+        return;
+      }
+      
+      let polarLine = this._polarLines.find(item => item.windspeed()==ws);
+      if (polarLine) {
+        this._current = polarLine.clone();
+        this.uiRefreshCurrentPolarEditor();
+        window.polarCanvas.redraw();
+      }
+    });
+
     this.uiRefreshCurrentPolarEditor();
+  }
+
+  uiRefreshCurrentPolarLoadStoreBtns() {
+    let ws = this.currentWindspeed()
+    if (!ws) {
+      this._uiCurrentPolarStoreBtn.disabled = true;
+      this._uiCurrentPolarLoadBtn.disabled = true;
+    }
+    else {
+      this._uiCurrentPolarStoreBtn.disabled = false;
+      if (this._polarLines.some(item => item.windspeed() == ws)) {
+        this._uiCurrentPolarLoadBtn.disabled = false;
+      } else {
+        this._uiCurrentPolarLoadBtn.disabled = true;
+      }
+    }
   }
 
   
   uiRefreshCurrentPolarEditor() {
-
     this._uiCurrentPolarEditor.value = "TWA\tBS\r" + (new SinglePolarFormat(this._current)).toString();
   }
 

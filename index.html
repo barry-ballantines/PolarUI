@@ -88,19 +88,23 @@
   
   <div id="currentPolar" class="controls">
     <h3>Current Polar Editor</h3>
-    <p>
-      <span class="label">Windspeed:</span>
-      <input id="currentPolar_windspeed" type="text" size="4" /> kts
-    </p>
+    
     <textarea id="currentPolar_editor" rows="10"></textarea>
     <br />
     <button id="currentPolar_clear">Clear</button>
     <button id="currentPolar_refresh">Refresh UI</button>
-    <button id="currentPolar_store" disabled="disabled">Store</button>
     <p>Add data points by clicking on the polar diagram.
        If you edit your data points in the text area above,
        pressing [Refresh] will update the polar diagram.
        Use [Clear] to delete all data points.
+    </p>
+    <p>
+      <span class="label">Windspeed:</span>
+      <input id="currentPolar_windspeed" type="text" size="4" /> kts
+    </p>
+    <p>
+      <button id="currentPolar_store" disabled="disabled">Store</button>
+      <button id="currentPolar_load" disabled="disabled">Load</button>
     </p>
     <br />
   </div>
