@@ -67,6 +67,7 @@ export class PolarManager {
     this._uiCurrentPolarClearBtn.addEventListener("click", evt => {
       this._current.clear();
       this._uiCurrentPolarWindspeedTF.value = "";
+      this._uiCurrentPolarStoreBtn.disabled = true;
       this.uiRefreshCurrentPolarEditor()
       window.polarCanvas.redraw();
     });
