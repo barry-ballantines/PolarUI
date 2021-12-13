@@ -104,6 +104,13 @@ export class PolarManager {
       }
     });
 
+    this._uiStoredPolarsOutput.addEventListener("change", evt => {
+      let text = this._uiStoredPolarsOutput.value;
+      let parser = new MultiPolarsFormat(this._polarLines);
+      parser.fromString(text);
+      this.uiRefreshStoredPolarsOutput();
+    });
+
     this.uiRefreshCurrentPolarEditor();
   }
 
